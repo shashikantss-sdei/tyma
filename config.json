@@ -1,0 +1,9 @@
+{
+    "MONGO_URL" : "mongodb://localhost:27017/testApi ",
+"PORT" : 8002,
+"config.client_url":"http://localhost:4001",
+"config.ResetPassword_Key":"forgetpassowrdLinkkklllllllllllll",
+"SENDGRID_API_KEY":"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",
+"JWT_SECRET":"gffnxruiiiiiiiiiiiiiiiiiiiiikjffnnnn",
+"SECRET_KEY":"sdnknbvnmcnvfkjkdjgjdkfkdkkjdjkkdkfdkjk"
+}

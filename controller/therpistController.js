@@ -4,6 +4,8 @@ const validator = require("validator");
 const bcrypt  = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const _ = require("lodash");
+const nodemailer = require("nodemailer");
+const randomstring = require("randomstring");
 
 //const mailgun = require("mailgun.js");
 //const DOMAIN = "";
@@ -67,80 +69,91 @@ const therpistController = {
      }
    },
 
-    // Fotget Password
+////////////////////forget password
     forgetPassword:async(req,res)=>{
-        try{
-          const {email} = req.body;
-          const user = await Therpist.findOne({email});
+      try{ 
+          console.log(req.body);
+          const email = req.body.email
+          const user = await Therpist.findOne({email:email});
           if(user){
-            return res.status(400).json({
-              message:"User already exists"
-            });
-           }
-          
-           //
-           // create token 
-           const token = jwt.sign({_id:user._id}, config.ResetPassword_Key, {expiresIn:"15m"});
-           const msg = {
-       
-               to: email, // Change to your recipient
-               from: 'test@example.com', // Change to your verified sender
-               subject: 'Account Activation Linnk',
-               
-               html: `<h2>Please active your email account link before 15 minutes</h2>
-                    <p>${config.client_url}/resetPassword/${token}</p>
-               `
-             }
-             return user.updateOne({resetLink:token},(err,data)=>{
-               if(err){
-                 return res.status(400).json({message:"password reset is not completed.."});
-               }else{
-               mg.message().send(msg, (error,body)=>{
-                 if(error){
-                   return res.status(400).json(error)
-                 }
-                 return res.status(200).json({
-                   message:"Email has been sent: kindly follow the instruction"
-                 })
-               })
-   
-               }
-             });
+              const randomString = randomstring.generate();
+              sendEmailResetPasswordMail(user.name,user.email,randomString)
+              const data =await Therpist.updateOne({email:email},{$set:{resetLink:randomString}});
+              return res.status(200).json({
+                  message:"Please check your mail box and reset  your password",
+                  data:data
+              })
+          }else{
+              return res.status(400).json({err:{message:"this email deos not exists"}});
+          }
+      }catch(err){
+          return res.status(500).json({err:{message:"Some error occured!"}});
+      }
+  },
 
-        }catch(err){
-          return res.status(500).json({message:err.message});
-        }
-      },
+  ///////////////reset password
 
-      // reset password
-      resetPassword:async(req,res)=>{
-        try{
-         const {resetLink,newPass} = req.body;
-         if(resetLink){
-          jwt.verify(resetLink, config.ResetPassword_Key,(err,decodedData)=>{
-            if(err){
-              return res.status(401).json({err:{message:"Incorrect token or it it expired"}})
+  reset_Password:async(req,res)=>{
+    try{
+      const token = req.query.resetLink;
+      const tokenData = await User.findOne({token:resetLink});
+      if(tokenData){
+          password = req.body.password;
+           const newPassword = await bcrypt.hash(password,10);
+           const updateData = await User.findByIdAndUpdate({_id:tokenData._id},{$set:{password:newPassword, token:''}},{new:true});
+           return res.status(200).json({
+               message:"Password has been reset successfully",
+               data:updateData,
+               token:token
+           })
+      }
+      else{
+          return res.status(400).json({message:"Token link has been expired or incorrect token "});
+      }
+    }catch(err){
+        return res.status(500).json({
+            err:{
+                message:"Some error occured",
             }
-            const user =  Therpist.findOne({resetLink});
-            if(!user){
-              return res.status(400).json({message:"User does not exits"});
-            }
-            const obj = {
-              password : newPass
-            }
-            user = _.extend(user,obj);
-            user.save();
-            return  res.status(200).json({message:"Your password has been changed successfuly"});
-          })
-         
-         }
-         else{
-           return res.status(401).json({err:{message:"Authentication Error"}})
-         }
-        }catch(err){
-          return res.status(500).json({err:{message:"Some server sidev error occured!"}});
+        })
+    }
+ },
+
+}
+
+
+const sendEmailResetPasswordMail= async(name,email,resetLink)=>{
+  try{
+  const transporter =  nodemailer.createTransport({
+        host:'smtp.gmail.com',
+        port:587,
+        secure:false,
+        requireTLS:true,
+        auth:{
+            user:config.emailUser,
+            pass:config.userPass,
         }
-      },
+
+    });
+
+    const mailOptions = {
+        from:config.emailUser,
+        to:email,
+        subject:'reset passowrd',
+        html:`<h1> ${name} please reset your password for use of the given url: ${config.client_url}/reset_Password/${resetLink}</h1>`
+    }
+    transporter.sendMail(mailOptions,(error,response)=>{
+      if(error){
+          console.log(error);
+      }
+      else{
+          console.log("Mail has been sent", response.response);
+      }
+    });
+      
+  }catch(err){
+      return res.status(400).json({err:{message:err.message}})
+  }
 
 }
 

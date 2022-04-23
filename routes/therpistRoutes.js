@@ -9,8 +9,8 @@ router.post("/signup", therpistController.therpistSignUp);
 router.post("/Login", therpistController.therpistLogin);
 
 // forget password
-router.put("/forgetPassword", therpistController.forgetPassword);
+router.post("/forgetPassword", therpistController.forgetPassword);
 
 // reset password
-router.put("/resetPassowrd", therpistController.resetPassword);
+router.get("/reset_Passowrd", therpistController.reset_Password);
 module.exports = router;

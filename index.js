@@ -11,13 +11,18 @@ mongoose.connect(config.MONGO_URL).then((data)=>{
     console.log("no connection");
 });
 
-
+ 
 // configration 
 const app = express();
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(cors());
+
+//checking api is working or not
+app.get("/",(req,res)=>{
+    res.send("Api is working");
+})
 
 // routes
 //therpist routes

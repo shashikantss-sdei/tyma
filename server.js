@@ -6,10 +6,11 @@ const cors = require("cors");
 
 //db connection
 mongoose.connect(config.MONGO_URL).then((data)=>{
-    console.log("connected to db");
+    console.log("connected to db")
 }).catch((err)=>{
     console.log("no connection");
 });
+
 
 // configration 
 const app = express();

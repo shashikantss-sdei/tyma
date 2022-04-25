@@ -1,5 +1,5 @@
 {
-    "MONGO_URL" : "mongodb://localhost:27017/testApi ",
+    "MONGO_URL":"mongodb+srv://tyma:lnHXd9JfKqezo4fR@cluster0.aymjn.mongodb.net/tyma?retryWrites=true&w=majority",
 "PORT" : 8002,
 
 "JWT_SECRET":"gffnxruiiiiiiiiiiiiiiiiiiiiikjffnnnn",
@@ -7,4 +7,5 @@
 "emailUser":"",
     "userPass":"",
     "client_url":"http://localhost:3000"
+    
 }
